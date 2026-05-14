@@ -1,0 +1,19 @@
+[package]
+name = "ripgrep-ffi"
+version = "0.1.0"
+edition = "2024"
+authors = ["Mark Devenyi"]
+description = "C FFI library for ripgrep (rg)"
+readme = "README.md"
+homepage = "https://github.com/Wrench56/ripgrep-ffi"
+repository = "https://github.com/Wrench56/ripgrep-ffi"
+license = "MIT"
+
+[lib]
+name = "ripgrep_ffi"
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+grep-matcher = "0.1.8"
+grep-regex = "0.1.14"
+libc= "0.2"
