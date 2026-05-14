@@ -5,6 +5,9 @@ compile_commands.json
 # Ignore direnv directory
 .direnv/
 
+# Ignore build artifacts
+build/
+
 # Ignore commitlint executable
 tools/commitlint*
 
