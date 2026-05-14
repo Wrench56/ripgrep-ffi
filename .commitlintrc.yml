@@ -23,6 +23,7 @@ rules:
       - license
       - regex
       - glob
+      - walker
   subject-empty:
     level: error
   type:
