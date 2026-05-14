@@ -61,8 +61,8 @@ KRITIC_TEST(regex, find_at, KRITIC_DEPENDS_ON(regex, build_matcher)) {
         rg_regex_matcher_find_at(matcher, &m, text, strlen(text), 0), MATCH
     );
 
-    KRITIC_ASSERT_EQ(m.start, (size_t)4);
-    KRITIC_ASSERT_EQ(m.end, (size_t)9);
+    KRITIC_ASSERT_EQ(m.start, (size_t) 4);
+    KRITIC_ASSERT_EQ(m.end, (size_t) 9);
     KRITIC_ASSERT_EQ_INT(strncmp(text + m.start, "HeLLo", m.end - m.start), 0);
 
     rg_regex_matcher_free(matcher);
@@ -127,7 +127,7 @@ KRITIC_TEST(regex, shortest_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
         MATCH
     );
 
-    KRITIC_ASSERT_EQ(shortest, (size_t)9);
+    KRITIC_ASSERT_EQ(shortest, (size_t) 9);
 
     rg_regex_matcher_free(matcher);
 }
@@ -153,14 +153,14 @@ KRITIC_TEST(regex, captures, KRITIC_DEPENDS_ON(regex, build_matcher)) {
 
     KRITIC_ASSERT_EQ_INT(
         rg_regex_matcher_captures_at(
-            matcher, (const uint8_t*)text, strlen(text), 0, caps
+            matcher, (const uint8_t*) text, strlen(text), 0, caps
         ),
         MATCH
     );
 
     size_t count = rg_regex_matcher_capture_count(matcher);
 
-    KRITIC_ASSERT_EQ(count, (size_t)2);
+    KRITIC_ASSERT_EQ(count, (size_t) 2);
 
     rg_regex_match_t whole = {0};
     rg_regex_match_t group = {0};
@@ -168,14 +168,14 @@ KRITIC_TEST(regex, captures, KRITIC_DEPENDS_ON(regex, build_matcher)) {
     KRITIC_ASSERT_EQ_INT(rg_regex_captures_get(caps, 0, &whole), MATCH);
     KRITIC_ASSERT_EQ_INT(rg_regex_captures_get(caps, 1, &group), MATCH);
 
-    KRITIC_ASSERT_EQ(whole.start, (size_t)4);
-    KRITIC_ASSERT_EQ(whole.end, (size_t)9);
+    KRITIC_ASSERT_EQ(whole.start, (size_t) 4);
+    KRITIC_ASSERT_EQ(whole.end, (size_t) 9);
     KRITIC_ASSERT_EQ_INT(
         strncmp(text + whole.start, "HeLLo", whole.end - whole.start), 0
     );
 
-    KRITIC_ASSERT_EQ(group.start, (size_t)5);
-    KRITIC_ASSERT_EQ(group.end, (size_t)8);
+    KRITIC_ASSERT_EQ(group.start, (size_t) 5);
+    KRITIC_ASSERT_EQ(group.end, (size_t) 8);
     KRITIC_ASSERT_EQ_INT(
         strncmp(text + group.start, "eLL", group.end - group.start), 0
     );

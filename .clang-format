@@ -20,7 +20,7 @@ AlignAfterOpenBracket: BlockIndent
 AlignConsecutiveDeclarations: false
 AlignConsecutiveAssignments: false
 
-SpaceAfterCStyleCast: false
+SpaceAfterCStyleCast: true
 SpacesInParentheses: false
 SpaceBeforeParens: ControlStatements
 
