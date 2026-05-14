@@ -1,0 +1,3 @@
+[submodule "extern/kritic"]
+	path = extern/kritic
+	url = https://github.com/Wrench56/KritiC.git

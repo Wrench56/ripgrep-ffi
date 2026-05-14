@@ -1,0 +1,17 @@
+# Ignore LSP cache
+.ccls-cache/
+compile_commands.json
+
+# Ignore direnv directory
+.direnv/
+
+# Ignore commitlint executable
+tools/commitlint*
+
+# Ignore CForge artifacts
+cforge.h
+.cforge.db
+.b
+
+# Added by cargo
+/target
