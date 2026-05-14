@@ -21,6 +21,7 @@ rules:
     options:
       - commitlint
       - license
+      - regex
   subject-empty:
     level: error
   type:
