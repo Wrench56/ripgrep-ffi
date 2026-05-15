@@ -32,10 +32,11 @@ KRITIC_TEST(regex, build_matcher) {
     rg_regex_matcher_opts_t opts;
     make_default_opts(&opts);
 
+    const char* patterns[] = {"h([a-z]+)o"};
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, "h([a-z]+)o"), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
     );
 
     KRITIC_ASSERT(matcher != NULL);
@@ -43,15 +44,85 @@ KRITIC_TEST(regex, build_matcher) {
     rg_regex_matcher_free(matcher);
 }
 
-KRITIC_TEST(regex, find_at, KRITIC_DEPENDS_ON(regex, build_matcher)) {
-
+KRITIC_TEST(regex, build_many) {
     rg_regex_matcher_opts_t opts;
     make_default_opts(&opts);
 
+    const char* patterns[] = {"hello", "world", "test[0-9]+"};
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, "h([a-z]+)o"), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 3, false), OK
+    );
+
+    KRITIC_ASSERT(matcher != NULL);
+
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_matcher_is_match(
+            matcher, "123 WORLD 456", strlen("123 WORLD 456")
+        ),
+        MATCH
+    );
+
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_matcher_is_match(
+            matcher, "abc test42 xyz", strlen("abc test42 xyz")
+        ),
+        MATCH
+    );
+
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_matcher_is_match(
+            matcher, "nothing here", strlen("nothing here")
+        ),
+        NO_MATCH
+    );
+
+    rg_regex_matcher_free(matcher);
+}
+
+KRITIC_TEST(regex, build_literals) {
+    rg_regex_matcher_opts_t opts;
+    make_default_opts(&opts);
+
+    const char* patterns[] = {"a+b", "hello.world"};
+    rg_matcher_t* matcher = NULL;
+
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_matcher_build(&matcher, &opts, patterns, 2, true), OK
+    );
+
+    KRITIC_ASSERT(matcher != NULL);
+
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_matcher_is_match(matcher, "xx a+b yy", strlen("xx a+b yy")),
+        MATCH
+    );
+
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_matcher_is_match(
+            matcher, "xx hello.world yy", strlen("xx hello.world yy")
+        ),
+        MATCH
+    );
+
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_matcher_is_match(matcher, "xx aaab yy", strlen("xx aaab yy")),
+        NO_MATCH
+    );
+
+    rg_regex_matcher_free(matcher);
+}
+
+KRITIC_TEST(regex, find_at, KRITIC_DEPENDS_ON(regex, build_matcher)) {
+    rg_regex_matcher_opts_t opts;
+    make_default_opts(&opts);
+
+    const char* patterns[] = {"h([a-z]+)o"};
+    rg_matcher_t* matcher = NULL;
+
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
     );
 
     const char* text = "123 HeLLo 456";
@@ -69,14 +140,14 @@ KRITIC_TEST(regex, find_at, KRITIC_DEPENDS_ON(regex, build_matcher)) {
 }
 
 KRITIC_TEST(regex, is_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
-
     rg_regex_matcher_opts_t opts;
     make_default_opts(&opts);
 
+    const char* patterns[] = {"h([a-z]+)o"};
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, "h([a-z]+)o"), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
     );
 
     const char* text = "123 HeLLo 456";
@@ -89,14 +160,14 @@ KRITIC_TEST(regex, is_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
 }
 
 KRITIC_TEST(regex, no_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
-
     rg_regex_matcher_opts_t opts;
     make_default_opts(&opts);
 
+    const char* patterns[] = {"h([a-z]+)o"};
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, "h([a-z]+)o"), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
     );
 
     const char* text = "nothing here";
@@ -109,14 +180,14 @@ KRITIC_TEST(regex, no_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
 }
 
 KRITIC_TEST(regex, shortest_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
-
     rg_regex_matcher_opts_t opts;
     make_default_opts(&opts);
 
+    const char* patterns[] = {"h([a-z]+)o"};
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, "h([a-z]+)o"), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
     );
 
     const char* text = "123 HeLLo 456";
@@ -133,14 +204,14 @@ KRITIC_TEST(regex, shortest_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
 }
 
 KRITIC_TEST(regex, captures, KRITIC_DEPENDS_ON(regex, build_matcher)) {
-
     rg_regex_matcher_opts_t opts;
     make_default_opts(&opts);
 
+    const char* patterns[] = {"h([a-z]+)o"};
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, "h([a-z]+)o"), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
     );
 
     const char* text = "123 HeLLo 456";
@@ -188,9 +259,25 @@ KRITIC_TEST(regex, invalid_pattern_fails) {
     rg_regex_matcher_opts_t opts;
     make_default_opts(&opts);
 
+    const char* patterns[] = {"("};
     rg_matcher_t* matcher = NULL;
 
-    KRITIC_ASSERT_NE_INT(rg_regex_matcher_build(&matcher, &opts, "("), OK);
+    KRITIC_ASSERT_NE_INT(
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
+    );
+
+    KRITIC_ASSERT(matcher == NULL);
+}
+
+KRITIC_TEST(regex, empty_patterns_fail) {
+    rg_regex_matcher_opts_t opts;
+    make_default_opts(&opts);
+
+    rg_matcher_t* matcher = NULL;
+
+    KRITIC_ASSERT_NE_INT(
+        rg_regex_matcher_build(&matcher, &opts, NULL, 0, false), OK
+    );
 
     KRITIC_ASSERT(matcher == NULL);
 }

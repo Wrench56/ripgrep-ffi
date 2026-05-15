@@ -158,38 +158,6 @@ fn make_builder(opts: &RgffiRegexMatcherOpts) -> Result<RegexMatcherBuilder, Rgf
     Ok(builder)
 }
 
-fn build_common(
-    matcher: *mut *mut RgffiMatcher,
-    opts: *const RgffiRegexMatcherOpts,
-    build: impl FnOnce(&RegexMatcherBuilder) -> Result<RegexMatcher, grep_regex::Error>,
-) -> c_int {
-    if matcher.is_null() || opts.is_null() {
-        return RgffiRegexErr::NullErr as c_int;
-    }
-
-    unsafe {
-        *matcher = ptr::null_mut();
-    }
-
-    let opts = unsafe { &*opts };
-
-    let builder = match make_builder(opts) {
-        Ok(builder) => builder,
-        Err(e) => return e as c_int,
-    };
-
-    let inner = match build(&builder) {
-        Ok(m) => m,
-        Err(_) => return RgffiRegexErr::RegexErr as c_int,
-    };
-
-    unsafe {
-        *matcher = Box::into_raw(Box::new(RgffiMatcher { inner }));
-    }
-
-    RgffiRegexErr::Ok as c_int
-}
-
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rg_regex_default_opts(opts: *mut RgffiRegexMatcherOpts) -> c_int {
     if opts.is_null() {
@@ -234,44 +202,51 @@ pub extern "C" fn rg_regex_version() -> *const c_char {
 pub unsafe extern "C" fn rg_regex_matcher_build(
     matcher: *mut *mut RgffiMatcher,
     opts: *const RgffiRegexMatcherOpts,
-    pattern: *const c_char,
-) -> c_int {
-    let pattern = match unsafe { cstr_to_str(pattern) } {
-        Ok(s) => s,
-        Err(e) => return e as c_int,
-    };
-
-    build_common(matcher, opts, |builder| builder.build(pattern))
-}
-
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn rg_regex_matcher_build_many(
-    matcher: *mut *mut RgffiMatcher,
-    opts: *const RgffiRegexMatcherOpts,
     patterns: *const *const c_char,
     patterns_len: size_t,
+    is_literal: bool,
 ) -> c_int {
+    if patterns_len == 0 {
+        return RgffiRegexErr::NotAllowedErr as c_int;
+    }
+
     let patterns = match unsafe { cstr_array_to_vec(patterns, patterns_len) } {
         Ok(v) => v,
         Err(e) => return e as c_int,
     };
 
-    build_common(matcher, opts, |builder| builder.build_many(&patterns))
-}
+    if matcher.is_null() || opts.is_null() {
+        return RgffiRegexErr::NullErr as c_int;
+    }
 
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn rg_regex_matcher_build_literals(
-    matcher: *mut *mut RgffiMatcher,
-    opts: *const RgffiRegexMatcherOpts,
-    literals: *const *const c_char,
-    literals_len: size_t,
-) -> c_int {
-    let literals = match unsafe { cstr_array_to_vec(literals, literals_len) } {
-        Ok(v) => v,
+    unsafe {
+        *matcher = ptr::null_mut();
+    }
+
+    let opts = unsafe { &*opts };
+
+    let builder = match make_builder(opts) {
+        Ok(builder) => builder,
         Err(e) => return e as c_int,
     };
 
-    build_common(matcher, opts, |builder| builder.build_literals(&literals))
+    let inner = match match (patterns_len, is_literal) {
+        (1, false) => builder.build(patterns[0]),
+        (_, false) => builder.build_many(&patterns),
+        (_, true) => {
+            let escaped: Vec<String> = patterns.iter().map(|p| regex_syntax::escape(p)).collect();
+            builder.build_literals(&escaped)
+        }
+    } {
+        Ok(matcher) => matcher,
+        Err(_) => return RgffiRegexErr::RegexErr as c_int,
+    };
+
+    unsafe {
+        *matcher = Box::into_raw(Box::new(RgffiMatcher { inner }));
+    }
+
+    RgffiRegexErr::Ok as c_int
 }
 
 #[unsafe(no_mangle)]

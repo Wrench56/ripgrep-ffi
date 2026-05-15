@@ -60,19 +60,9 @@ rg_regex_err_t rg_regex_default_opts(rg_regex_matcher_opts_t* opts);
 rg_regex_err_t rg_regex_matcher_build(
     rg_matcher_t** matcher,
     const rg_regex_matcher_opts_t* opts,
-    const char* pattern
-);
-rg_regex_err_t rg_regex_matcher_build_many(
-    rg_matcher_t** matcher,
-    const rg_regex_matcher_opts_t* opts,
     const char* patterns[],
-    size_t patterns_len
-);
-rg_regex_err_t rg_regex_matcher_build_literals(
-    rg_matcher_t** matcher,
-    const rg_regex_matcher_opts_t* opts,
-    char* literals[],
-    size_t literals_len
+    size_t patterns_len,
+    bool is_literal
 );
 
 void rg_regex_matcher_free(rg_matcher_t* matcher);

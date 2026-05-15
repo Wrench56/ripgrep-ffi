@@ -160,6 +160,7 @@ dependencies = [
  "grep-regex",
  "ignore",
  "libc",
+ "regex-syntax",
 ]
 
 [[package]]
