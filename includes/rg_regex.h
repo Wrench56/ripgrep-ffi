@@ -10,15 +10,15 @@ extern "C" {
 #endif
 
 typedef enum rg_regex_err {
-    OK = 0,
-    MATCH = 1,
-    NO_MATCH = 2,
-    REGEX_ERR = -1,
-    NOT_ALLOWED_ERR = -2,
-    INVALID_LINE_TERMINATOR_ERR = -3,
-    BANNED_ERR = -4,
-    NULL_ERR = -5,
-    UTF8_ERR = -6,
+    RG_REGEX_OK = 0,
+    RG_REGEX_MATCH = 1,
+    RG_REGEX_NO_MATCH = 2,
+    RG_REGEX_REGEX_ERR = -1,
+    RG_REGEX_NOT_ALLOWED_ERR = -2,
+    RG_REGEX_INVALID_LINE_TERMINATOR_ERR = -3,
+    RG_REGEX_BANNED_ERR = -4,
+    RG_REGEX_NULL_ERR = -5,
+    RG_REGEX_UTF8_ERR = -6,
 } rg_regex_err_t;
 
 typedef struct rg_regex_matcher_opts {

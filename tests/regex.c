@@ -36,7 +36,7 @@ KRITIC_TEST(regex, build_matcher) {
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), RG_REGEX_OK
     );
 
     KRITIC_ASSERT(matcher != NULL);
@@ -52,7 +52,7 @@ KRITIC_TEST(regex, build_many) {
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, patterns, 3, false), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 3, false), RG_REGEX_OK
     );
 
     KRITIC_ASSERT(matcher != NULL);
@@ -61,21 +61,21 @@ KRITIC_TEST(regex, build_many) {
         rg_regex_matcher_is_match(
             matcher, "123 WORLD 456", strlen("123 WORLD 456")
         ),
-        MATCH
+        RG_REGEX_MATCH
     );
 
     KRITIC_ASSERT_EQ_INT(
         rg_regex_matcher_is_match(
             matcher, "abc test42 xyz", strlen("abc test42 xyz")
         ),
-        MATCH
+        RG_REGEX_MATCH
     );
 
     KRITIC_ASSERT_EQ_INT(
         rg_regex_matcher_is_match(
             matcher, "nothing here", strlen("nothing here")
         ),
-        NO_MATCH
+        RG_REGEX_NO_MATCH
     );
 
     rg_regex_matcher_free(matcher);
@@ -89,26 +89,26 @@ KRITIC_TEST(regex, build_literals) {
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, patterns, 2, true), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 2, true), RG_REGEX_OK
     );
 
     KRITIC_ASSERT(matcher != NULL);
 
     KRITIC_ASSERT_EQ_INT(
         rg_regex_matcher_is_match(matcher, "xx a+b yy", strlen("xx a+b yy")),
-        MATCH
+        RG_REGEX_MATCH
     );
 
     KRITIC_ASSERT_EQ_INT(
         rg_regex_matcher_is_match(
             matcher, "xx hello.world yy", strlen("xx hello.world yy")
         ),
-        MATCH
+        RG_REGEX_MATCH
     );
 
     KRITIC_ASSERT_EQ_INT(
         rg_regex_matcher_is_match(matcher, "xx aaab yy", strlen("xx aaab yy")),
-        NO_MATCH
+        RG_REGEX_NO_MATCH
     );
 
     rg_regex_matcher_free(matcher);
@@ -122,14 +122,15 @@ KRITIC_TEST(regex, find_at, KRITIC_DEPENDS_ON(regex, build_matcher)) {
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), RG_REGEX_OK
     );
 
     const char* text = "123 HeLLo 456";
     rg_regex_match_t m = {0};
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_find_at(matcher, &m, text, strlen(text), 0), MATCH
+        rg_regex_matcher_find_at(matcher, &m, text, strlen(text), 0),
+        RG_REGEX_MATCH
     );
 
     KRITIC_ASSERT_EQ(m.start, (size_t) 4);
@@ -147,13 +148,13 @@ KRITIC_TEST(regex, is_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), RG_REGEX_OK
     );
 
     const char* text = "123 HeLLo 456";
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_is_match(matcher, text, strlen(text)), MATCH
+        rg_regex_matcher_is_match(matcher, text, strlen(text)), RG_REGEX_MATCH
     );
 
     rg_regex_matcher_free(matcher);
@@ -167,13 +168,14 @@ KRITIC_TEST(regex, no_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), RG_REGEX_OK
     );
 
     const char* text = "nothing here";
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_is_match(matcher, text, strlen(text)), NO_MATCH
+        rg_regex_matcher_is_match(matcher, text, strlen(text)),
+        RG_REGEX_NO_MATCH
     );
 
     rg_regex_matcher_free(matcher);
@@ -187,7 +189,7 @@ KRITIC_TEST(regex, shortest_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), RG_REGEX_OK
     );
 
     const char* text = "123 HeLLo 456";
@@ -195,7 +197,7 @@ KRITIC_TEST(regex, shortest_match, KRITIC_DEPENDS_ON(regex, build_matcher)) {
 
     KRITIC_ASSERT_EQ_INT(
         rg_regex_matcher_shortest_match(matcher, text, strlen(text), &shortest),
-        MATCH
+        RG_REGEX_MATCH
     );
 
     KRITIC_ASSERT_EQ(shortest, (size_t) 9);
@@ -211,14 +213,16 @@ KRITIC_TEST(regex, captures, KRITIC_DEPENDS_ON(regex, build_matcher)) {
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_EQ_INT(
-        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), RG_REGEX_OK
     );
 
     const char* text = "123 HeLLo 456";
 
     rg_regex_captures_t* caps = NULL;
 
-    KRITIC_ASSERT_EQ_INT(rg_regex_matcher_new_captures(matcher, &caps), OK);
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_matcher_new_captures(matcher, &caps), RG_REGEX_OK
+    );
 
     KRITIC_ASSERT(caps != NULL);
 
@@ -226,7 +230,7 @@ KRITIC_TEST(regex, captures, KRITIC_DEPENDS_ON(regex, build_matcher)) {
         rg_regex_matcher_captures_at(
             matcher, (const uint8_t*) text, strlen(text), 0, caps
         ),
-        MATCH
+        RG_REGEX_MATCH
     );
 
     size_t count = rg_regex_matcher_capture_count(matcher);
@@ -236,8 +240,12 @@ KRITIC_TEST(regex, captures, KRITIC_DEPENDS_ON(regex, build_matcher)) {
     rg_regex_match_t whole = {0};
     rg_regex_match_t group = {0};
 
-    KRITIC_ASSERT_EQ_INT(rg_regex_captures_get(caps, 0, &whole), MATCH);
-    KRITIC_ASSERT_EQ_INT(rg_regex_captures_get(caps, 1, &group), MATCH);
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_captures_get(caps, 0, &whole), RG_REGEX_MATCH
+    );
+    KRITIC_ASSERT_EQ_INT(
+        rg_regex_captures_get(caps, 1, &group), RG_REGEX_MATCH
+    );
 
     KRITIC_ASSERT_EQ(whole.start, (size_t) 4);
     KRITIC_ASSERT_EQ(whole.end, (size_t) 9);
@@ -263,7 +271,7 @@ KRITIC_TEST(regex, invalid_pattern_fails) {
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_NE_INT(
-        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), OK
+        rg_regex_matcher_build(&matcher, &opts, patterns, 1, false), RG_REGEX_OK
     );
 
     KRITIC_ASSERT(matcher == NULL);
@@ -276,7 +284,7 @@ KRITIC_TEST(regex, empty_patterns_fail) {
     rg_matcher_t* matcher = NULL;
 
     KRITIC_ASSERT_NE_INT(
-        rg_regex_matcher_build(&matcher, &opts, NULL, 0, false), OK
+        rg_regex_matcher_build(&matcher, &opts, NULL, 0, false), RG_REGEX_OK
     );
 
     KRITIC_ASSERT(matcher == NULL);
