@@ -8,6 +8,7 @@
 
 #define TEST_DIR "tests"
 #define TEST_BUILD_DIR "build/tests"
+#define TEST_BIN TEST_BUILD_DIR "/all"
 #define INCLUDE_DIR "includes"
 #define KRITIC_DIR "extern/kritic"
 #define KRITIC_LIB KRITIC_DIR "/build/libkritic.a"
@@ -54,7 +55,7 @@ CF_CONFIG(debug) {
         "-fsanitize=undefined"
     );
 
-    CF_SET_ENV(ldflags, "-ldl -lpthread -lm");
+    CF_SET_ENV(ldflags, "-ldl -lpthread -lm -fsanitize=undefined");
 }
 
 CF_CONFIG(release) {
@@ -106,32 +107,53 @@ CF_TARGET(kritic, CF_HELP_STRING("Build KritiC static library")) {
 CF_TARGET(tests, CF_DEPENDS(rgffi), CF_DEPENDS(kritic), CF_HIDDEN) {
     CF_MKDIR(TEST_BUILD_DIR);
 
+    cf_glob_t test_glob = CF_GLOB(TEST_DIR "/*.c");
+    char* test_sources = CF_JOIN_GLOB(test_glob, " ");
+
+    bool rebuild = CF_FILE_NOT_UTD(TEST_BIN) ||
+                   CF_FILE_NOT_UTD((char*) rg_lib()) ||
+                   CF_FILE_NOT_UTD(KRITIC_LIB);
+
     for
         CF_GLOBS_EACH(TEST_DIR "/*.c", test_src) {
-            char* bin = CF_MAP(
-                test_src, CF_MAP_DIRS(TEST_BUILD_DIR "/"), CF_MAP_EXT("")
-            );
-
-            CF_BANNER(CC_TAG "Compiling tests...");
-            printf(CC_TAG "  %s -> %s\n", test_src, bin);
-
-            CF_RUNP(
-                "cc %s %s %s " KRITIC_LIB " %s -o %s",
-                CF_ENV(cflags),
-                test_src,
-                rg_lib(),
-                CF_ENV(ldflags),
-                bin
-            );
+            if (CF_FILE_NOT_UTD(test_src)) {
+                rebuild = true;
+                break;
+            }
         }
+
+    if (!rebuild) {
+        return;
+    }
+
+    CF_BANNER("%s", CC_TAG "Compiling tests...");
+
+    for (uint32_t i = 0; i < test_glob.c; i++) {
+        printf(CC_TAG "  %s\n", test_glob.p[i]);
+    }
+
+    CF_RUN(
+        "cc %s %s %s " KRITIC_LIB " %s -o %s",
+        CF_ENV(cflags),
+        test_sources,
+        rg_lib(),
+        CF_ENV(ldflags),
+        TEST_BIN
+    );
+
+    for
+        CF_GLOBS_EACH(TEST_DIR "/*.c", test_src) {
+            CF_FILE_MARK_UTD(test_src);
+        }
+
+    CF_FILE_MARK_UTD((char*) rg_lib());
+    CF_FILE_MARK_UTD(KRITIC_LIB);
+    CF_FILE_MARK_UTD(TEST_BIN);
 }
 
 CF_TARGET(test, CF_DEPENDS(tests), CF_HELP_STRING("Run all compiled tests")) {
-    for
-        CF_GLOBS_EACH(TEST_BUILD_DIR "/*", bin) {
-            printf(RN_TAG "Running %s...\n", bin);
-            CF_RUN("./%s", bin);
-        }
+    printf(RN_TAG "Running %s...\n", TEST_BIN);
+    CF_RUN("./%s", TEST_BIN);
 }
 
 CF_TARGET(clean, CF_HELP_STRING("Clean build outputs")) {
