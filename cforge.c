@@ -88,7 +88,8 @@ CF_TARGET(
     CF_DEPENDS(test),
     CF_HELP_STRING("Build and run tests in release mode")
 ) {
-    CF_NOP();
+    CF_RUN("%s", "strip target/release/libripgrep_ffi.a");
+    CF_RUN("%s", "ranlib target/release/libripgrep_ffi.a");
 }
 
 CF_TARGET(rgffi, CF_HELP_STRING("Build ripgrep FFI Rust static library")) {
