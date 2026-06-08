@@ -159,6 +159,6 @@ CF_TARGET(test, CF_DEPENDS(tests), CF_HELP_STRING("Run all compiled tests")) {
 CF_TARGET(clean, CF_HELP_STRING("Clean build outputs")) {
     CF_RUNP("%s", "cargo clean");
     CF_RUNP("%s", "make -C " KRITIC_DIR " clean");
-    CF_REMOVE(TEST_BUILD_DIR);
-    CF_REMOVE(".cforge.db");
+    CF_RM(TEST_BUILD_DIR);
+    CF_RM(".cforge.db");
 }
